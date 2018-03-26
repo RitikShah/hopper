@@ -6,4 +6,4 @@ Date: Feb 26 '18
 
 '''
 g = game.Game()
-g.newgame()
+g.run()
