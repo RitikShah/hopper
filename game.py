@@ -31,29 +31,20 @@ class Game:
 		self.s_main    = Screen(self.gamedisplay, self.t_title, c=self.t_play, q=self.t_quit)
 		self.s_dead    = Screen(self.gamedisplay, self.t_over, c=self.t_play, q=self.t_quit, b=self.t_back)
 
-		self.levelpoints = [
-			[35, 2],
-			[75, 3],
-			[135, 4],
-			[190, 5],
-			[250, 6],
-			[300, 7],
-			[360, 8],
-			[440, 9],
-			[520, 10]
-		]
-
 		self.leveldifficulty = {
-			2:  (90),
-			3:  (80),
-			4:  (65),
-			5:  (50),
-			6:  (50),
-			7:  (45),
-			8:  (45),
-			9:  (35),
-			10: (30),
+			2:  [90, 'l', (1,5)],
+			3:  [80, 'l', (2,5)],
+			4:  [80, 'r', (1,5)],
+			5:  [70, 'r', (1,5)],
+			6:  [60, 'r', (2,5)],
+			7:  [60, 'lr', (2,7)],
+			8:  [50, 'lr', (2,7)],
+			9:  [40, 'lr', (2,10)],
+			10: [30, 'lr', (5,10)]
 		}
+
+	def curve(self, currentlevel):
+		return (currentlevel**1.2) * 30
 
 	def quitgame(self):
 		pygame.quit()
@@ -67,6 +58,8 @@ class Game:
 	def run(self):
 		while True:
 			self.level 	   = 1
+			self.prevlevel = 0
+
 			self.c 		   = entity.Character(winw/2, winh/2)
 			self.tick	   = 0
 			self.points    = 0
@@ -83,13 +76,13 @@ class Game:
 			elif exitcode == 'dead':
 				continue
 	
-	
 	def levelmanager(self):
-		for a in self.levelpoints:
-			if self.points > a[0]:
-				self.level = a[1]
-				entity.Enemy.spawnrate = self.leveldifficulty[self.level]
-	
+		if self.points > self.curve(self.level):
+			self.level += 1
+			entity.Enemy.spawnrate = self.leveldifficulty[self.level][0]
+			entity.Enemy.direction = self.leveldifficulty[self.level][1]
+			entity.Enemy.rrange    = self.leveldifficulty[self.level][2]
+
 	def waitforrelease(self):
 		pygame.event.pump()
 		key = pygame.key.get_pressed()
@@ -138,6 +131,7 @@ class Game:
 			Text(self.gamedisplay, 'Level: ' + str(self.level), white, ycenter=False, yoffset=20).displaytext()
 			Text(self.gamedisplay, 'Score: ' + str(self.points), white, ycenter=False, yoffset=40).displaytext()
 			Text(self.gamedisplay, 'Spawn Rate: ' + str(entity.Enemy.spawnrate), white, ycenter=False, yoffset=60).displaytext()
+			Text(self.gamedisplay, 'Direction: ' + str(entity.Enemy.direction), white, ycenter=False, yoffset=80).displaytext()
 
 			pygame.display.update()
 			self.clock.tick(self.fps)

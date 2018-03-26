@@ -6,10 +6,10 @@ winw = 800
 winh = 600
 
 class Entity:
-	def __init__(self, px, py, vx=0, vy=0, h=5, w=5, c=None):
+	def __init__(self, posx, posy, velx=0, vely=0, h=5, w=5, c=None):
 		self.size 		= {'height': h, 'width': w}
-		self.velocity	= {'x': vx, 'y': vy}
-		self.pos		= {'x': px, 'y': py - h/2}
+		self.velocity	= {'x': velx, 'y': vely}
+		self.pos		= {'x': posx, 'y': posy - h/2}
 
 		if c == None:
 			self.color 	= randcolor()
@@ -45,49 +45,74 @@ class Entity:
 			return False
 
 class Enemy(Entity):
+	# Static Variables
 	enemylist = []
 	spawnrate = 100
-	def __init__(self):
-		if random.randint(0,1) == 1:
-			vx = random.randint(1,10)
-			px = 0
-		else:
-			vx = -random.randint(1,10)	
-			px = winw
+	direction = 'l'
+	rrange    = (1,5)
 
-		super().__init__(px, winh-100, vx, 0, random.randint(5,10), random.randint(5,10))
+	def __init__(self):
+		if self.direction == 'l':
+			velx = random.randint(self.rrange[0],self.rrange[1])	
+			posx = 0
+		elif self.direction == 'r':
+			velx = -random.randint(self.rrange[0],self.rrange[1])
+			posx = winw
+		elif self.direction == 'lr':
+			if random.randint(0,1):
+				velx = random.randint(self.rrange[0],self.rrange[1])
+				posx = 0
+			else:
+				velx = -random.randint(self.rrange[0],self.rrange[1])	
+				posx = winw
+
+		super().__init__(posx, winh-100, velx, 0, random.randint(5,10), random.randint(5,10))
 		self.enemylist.append(self)
 
 	def update(self):
 		self.pos['x'] += self.velocity['x']
-		if self.pos['x'] > winh + self.size['width'] or self.pos['x'] < 0 - self.size['width']:
-			del self
+		if self.pos['x'] > winw + self.size['width'] or self.pos['x'] < 0 - self.size['width']:
+			self.enemylist.remove(self)
 	
-	@classmethod
+	@classmethod # Static Method
 	def reset(klass):
-		global enemylist, spawnrate
-		enemylist = []
-		spawnrate = 100
+		global enemylist, spawnrate, direction
+		klass.enemylist = []
+		klass.spawnrate = 100
+		klass.direction = 'l'
+		klass.rrange    = (1,5)
 
 class Character(Entity):
-	def __init__(self, px, py):
-		super().__init__(px, py, 5)
+	def __init__(self, posx, posy):
+		super().__init__(posx, posy, 5)
 
 		self.grav   = 1
 		self.xspeed = 5
 
 		self.jumpheight = 15
-
 		self.floorlevel = 100
+
+		self.doublejump = False
+		self.spacehold  = False
 
 	def update(self, key):
 		# Key Listener
-		if key[pygame.K_SPACE] and self.pos['y'] == winh-self.floorlevel: # jump
-			self.velocity['y'] = -self.jumpheight
+		if key[pygame.K_SPACE] and not(self.spacehold):
+			if self.pos['y'] == winh-self.floorlevel: 	# Ground Level
+				self.doublejump = True
+				self.velocity['y'] = -self.jumpheight
+				self.spacehold = True
+			elif self.doublejump:						# Double Jump
+				self.doublejump = False
+				self.velocity['y'] = -self.jumpheight
+				self.spacehold = True
+		elif not(key[pygame.K_SPACE]):
+			self.spacehold = False
+
 		if key[pygame.K_LEFT]:
 			self.pos['x'] -= self.xspeed
 		elif key[pygame.K_RIGHT]:
-			self.pos['x'] += self.xspeed	
+			self.pos['x'] += self.xspeed
 
 		# Gravity
 		self.pos['y'] += self.velocity['y']
