@@ -75,12 +75,19 @@ class Enemy(Entity):
 			self.enemylist.remove(self)
 	
 	@classmethod # Static Method
-	def reset(klass):
+	def reset(klass, data):
 		global enemylist, spawnrate, direction
 		klass.enemylist = []
-		klass.spawnrate = 100
-		klass.direction = 'l'
-		klass.rrange    = (1,5)
+		klass.spawnrate = data['spawnrate']
+		klass.direction = data['direction']
+		klass.rrange    = data['random_range']
+
+	@classmethod # Static Method
+	def difficulty(klass, data):
+		global spawnrate, direction
+		klass.spawnrate = data['spawnrate']
+		klass.direction = data['direction']
+		klass.rrange    = data['random_range']
 
 class Character(Entity):
 	def __init__(self, posx, posy):
@@ -92,18 +99,19 @@ class Character(Entity):
 		self.jumpheight = 15
 		self.floorlevel = 100
 
-		self.doublejump = False
+		self.jumps 		= 0
+		self.maxjumps	= 1
 		self.spacehold  = False
 
 	def update(self, key):
 		# Key Listener
 		if key[pygame.K_SPACE] and not(self.spacehold):
 			if self.pos['y'] == winh-self.floorlevel: 	# Ground Level
-				self.doublejump = True
+				self.jumps = self.maxjumps
 				self.velocity['y'] = -self.jumpheight
 				self.spacehold = True
-			elif self.doublejump:						# Double Jump
-				self.doublejump = False
+			elif self.jumps > 0:						# Double Jump
+				self.jumps -= 1
 				self.velocity['y'] = -self.jumpheight
 				self.spacehold = True
 		elif not(key[pygame.K_SPACE]):
@@ -113,6 +121,11 @@ class Character(Entity):
 			self.pos['x'] -= self.xspeed
 		elif key[pygame.K_RIGHT]:
 			self.pos['x'] += self.xspeed
+
+		if self.pos['x'] > winw-self.size['width']:
+			self.pos['x'] = winw-self.size['width']
+		if self.pos['x'] < 0:
+			self.pos['x'] = 0
 
 		# Gravity
 		self.pos['y'] += self.velocity['y']

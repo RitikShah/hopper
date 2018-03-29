@@ -5,5 +5,6 @@ Game by: Ritik Shah
 Date: Feb 26 '18
 
 '''
-g = game.Game()
-g.run()
+if __name__ == '__main__':
+	g = game.Game()
+	g.run()

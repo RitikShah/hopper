@@ -1,8 +1,10 @@
 import pygame
+import json
 import time
 import random
 import entity
 from text import *
+from screen import *
 from color import *
 
 winw = 800
@@ -14,6 +16,9 @@ class Game:
 		self.clock = pygame.time.Clock()
 		self.gamedisplay = pygame.display.set_mode((winw, winh))
 		pygame.display.set_caption("Slayin'")
+
+		with open('level.json') as file:
+			self.data = json.load(file)
 
 		self.fps 	   = 60
 		self.crashed   = False
@@ -29,19 +34,6 @@ class Game:
 		self.t_back    = Text(self.gamedisplay, 'B to go back to the main menu', yoffset=100)
 
 		self.s_main    = Screen(self.gamedisplay, self.t_title, c=self.t_play, q=self.t_quit)
-		self.s_dead    = Screen(self.gamedisplay, self.t_over, c=self.t_play, q=self.t_quit, b=self.t_back)
-
-		self.leveldifficulty = {
-			2:  [90, 'l', (1,5)],
-			3:  [80, 'l', (2,5)],
-			4:  [80, 'r', (1,5)],
-			5:  [70, 'r', (1,5)],
-			6:  [60, 'r', (2,5)],
-			7:  [60, 'lr', (2,7)],
-			8:  [50, 'lr', (2,7)],
-			9:  [40, 'lr', (2,10)],
-			10: [30, 'lr', (5,10)]
-		}
 
 	def curve(self, currentlevel):
 		return (currentlevel**1.2) * 30
@@ -56,16 +48,15 @@ class Game:
 				self.quitgame()
 
 	def run(self):
+		output = self.s_main.loop()
 		while True:
 			self.level 	   = 1
-			self.prevlevel = 0
 
 			self.c 		   = entity.Character(winw/2, winh/2)
 			self.tick	   = 0
 			self.points    = 0
-			entity.Enemy.reset()
+			entity.Enemy.reset(self.data[1])
 		
-			output = self.s_main.loop()
 			if output == pygame.K_q:
 				self.quitgame()
 
@@ -74,14 +65,18 @@ class Game:
 			if exitcode == 'quit':
 				self.quitgame()
 			elif exitcode == 'dead':
-				continue
+				output = self.gameover()
 	
+	def gameover(self):
+		s_gameover = Screen(self.gamedisplay, self.t_over, Text(self.gamedisplay, 'Level: ' + str(self.level), yoffset=20, ycenter=False), Text(self.gamedisplay, 'Score: ' + str(self.points), yoffset=40, ycenter=False),c=self.t_play, q=self.t_quit, b=self.t_back)
+		return s_gameover.loop()
+
 	def levelmanager(self):
 		if self.points > self.curve(self.level):
 			self.level += 1
-			entity.Enemy.spawnrate = self.leveldifficulty[self.level][0]
-			entity.Enemy.direction = self.leveldifficulty[self.level][1]
-			entity.Enemy.rrange    = self.leveldifficulty[self.level][2]
+			if len(self.data) >= self.level:
+				entity.Enemy.difficulty(self.data[self.level - 1])
+			# later: Include infinite difficulty curve
 
 	def waitforrelease(self):
 		pygame.event.pump()
@@ -113,8 +108,11 @@ class Game:
 			# Display Enemies
 			for e in entity.Enemy.enemylist:
 				pygame.draw.rect(self.gamedisplay, e.color, e.display())
-				if e.iscolliding(self.c):
-					return 'dead'
+				#if e.iscolliding(self.c):
+				#	return 'dead'
+
+			# Display Floor
+			# pygame.draw.rect(self.gamedisplay, white, [0, winh-95, winw, 4])
 
 			if self.tick > entity.Enemy.spawnrate:
 				self.tick = 0
