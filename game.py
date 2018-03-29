@@ -94,6 +94,15 @@ class Game:
 			if key[pygame.K_q]:
 				self.waitforrelease()
 				return 'quit'
+			elif key[pygame.K_p]:
+				Text(self.gamedisplay, 'Paused', white, 60).displaytext()
+				pygame.display.update()
+				self.waitforrelease()
+				key = pygame.key.get_pressed()
+				while not(key[pygame.K_p]):
+					self.xbutton()
+					key = pygame.key.get_pressed()
+				self.waitforrelease()
 			else:
 				self.c.update(key)
 				for e in entity.Enemy.enemylist:
@@ -108,8 +117,8 @@ class Game:
 			# Display Enemies
 			for e in entity.Enemy.enemylist:
 				pygame.draw.rect(self.gamedisplay, e.color, e.display())
-				#if e.iscolliding(self.c):
-				#	return 'dead'
+				if e.iscolliding(self.c):
+					return 'dead'
 
 			# Display Floor
 			# pygame.draw.rect(self.gamedisplay, white, [0, winh-95, winw, 4])
