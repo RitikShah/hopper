@@ -45,6 +45,7 @@ class Character(Entity):
 		if self.pos['y'] > winh-self.floorlevel:
 			self.pos['y'] = winh-self.floorlevel
 			self.velocity['y'] = 0
+		super().update()
 
 	def reset(self, posx, posy):
 		self.__init__(posx, posy)

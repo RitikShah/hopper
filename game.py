@@ -36,7 +36,7 @@ class Game:
 
 		self.s_main    = Screen(self.gamedisplay, self.t_title, c=self.t_play, q=self.t_quit)
 
-		self.c 		   = Character(winw/2, winh/2)
+		self.player	   = Character(winw/2, winh/2)
 
 	def curve(self, currentlevel):
 		return (currentlevel**1.2) * 30
@@ -56,10 +56,10 @@ class Game:
 			self.level 	    = 1
 			self.tick	    = 0
 			self.points     = 0
-			self.c.reset(winw/2, winh/2)
+			self.player.reset(winw/2, winh/2)
 
 			self.allsprites = pygame.sprite.Group()
-			self.allsprites.add(c)
+			self.allsprites.add(self.player)
 
 			Enemy.reset(self.data[0])
 		
@@ -96,6 +96,7 @@ class Game:
 		while not self.crashed:
 			self.xbutton()
 
+			# Key Listeners
 			key = pygame.key.get_pressed()
 			if key[pygame.K_q]:
 				self.waitforrelease()
@@ -110,29 +111,19 @@ class Game:
 					key = pygame.key.get_pressed()
 				self.waitforrelease()
 			else:
-				self.c.update(key)
-				for e in Enemy.enemylist:
-					e.update()
+				self.player.update(key)
+				Enemy.enemylist.update()
 
-			# Display Clear
-			self.gamedisplay.fill(black)
+			# Collision Detection 
+			collisions = pygame.sprite.spritecollide(self.player, Enemy.enemylist, True)
+			if len(collisions) > 1:
+				return 'dead'
 
-			# Display Character
-			pygame.draw.rect(self.gamedisplay, self.c.color, self.c.display())
-
-			# Display Enemies
-			for e in Enemy.enemylist:
-				pygame.draw.rect(self.gamedisplay, e.color, e.display())
-				if e.iscolliding(self.c):
-					return 'dead'
-
-			# Display Floor
-			# pygame.draw.rect(self.gamedisplay, white, [0, winh-95, winw, 4])
-
+			# Enemy Spawning
 			if self.tick > Enemy.spawnrate:
 				self.tick = 0
 				enemy = Enemy() # new enemy
-				self.enemylist.add(enemy)
+				Enemy.enemylist.add(enemy)
 				self.allsprites.add(enemy)
 
 			self.tick += 1
@@ -142,11 +133,27 @@ class Game:
 
 			self.levelmanager()
 
-			# Display
+			# Display Clear
+			self.gamedisplay.fill(black)
+
+			# Draw all sprites
+			self.allsprites.draw(self.gamedisplay)
+
+			# Display Enemies
+			#for e in Enemy.enemylist:
+			#	pygame.draw.rect(self.gamedisplay, e.color, e.display())
+			#	if e.iscolliding(self.player):
+			#		return 'dead'
+
+			# Display Floor
+			# pygame.draw.rect(self.gamedisplay, white, [0, winh-95, winw, 4])
+
+			# Display Text (last two temp)
 			Text(self.gamedisplay, 'Level: ' + str(self.level), white, ycenter=False, yoffset=20).displaytext()
 			Text(self.gamedisplay, 'Score: ' + str(self.points), white, ycenter=False, yoffset=40).displaytext()
 			Text(self.gamedisplay, 'Spawn Rate: ' + str(Enemy.spawnrate), white, ycenter=False, yoffset=60).displaytext()
 			Text(self.gamedisplay, 'Direction: ' + str(Enemy.direction), white, ycenter=False, yoffset=80).displaytext()
 
-			pygame.display.update()
+			# Update and tick @ 60fps
+			pygame.display.flip()
 			self.clock.tick(self.fps)

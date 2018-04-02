@@ -26,12 +26,12 @@ class Enemy(Entity):
 				posx = winw
 
 		super().__init__(posx, winh-100, velx, 0, random.randint(5,10), random.randint(5,10))
-		self.enemylist.append(self)
 
 	def update(self):
 		self.pos['x'] += self.velocity['x']
 		if self.pos['x'] > winw + self.size['width'] or self.pos['x'] < 0 - self.size['width']:
 			self.enemylist.remove(self)
+		super().update()
 	
 	@classmethod # Static Method
 	def reset(klass, data):

@@ -18,17 +18,17 @@ class Entity(pygame.sprite.Sprite):
 			self.color = randcolor()
 		else:
 			self.color = c
- 
-	    # Set the background color and set it to be transparent
-	    self.image = pygame.Surface(self.size['width'], self.size['height'])
-	    self.image.fill(white)
-	    self.image.set_colorkey(white)
- 
-    	# Draw the box
-    	pygame.draw.rect(self.image, self.color, [self.pos['x'], self.pos['y'], self.size['width'], self.size['height']])
 
-    	# Must have, God knows
-    	self.rect = self.image.get_rect()
+		# Set the background color and set it to be transparent
+		self.image = pygame.Surface((self.size['width'], self.size['height']))
+		self.image.fill(self.color)
+		self.image.set_colorkey(self.color)
+
+		# Draw the box
+		#pygame.draw.rect(self.image, self.color, [self.pos['x'], self.pos['y'], self.size['width'], self.size['height']])
+
+		# Must have, God knows
+		self.rect = self.image.get_rect()
 
 	def __str__(self):
 		return self.__class__ + ' Entity'
@@ -44,7 +44,7 @@ class Entity(pygame.sprite.Sprite):
 			self.velocity['y'] = 0
 
 	def update(self):
-		print(self)
+		self.rect.x, self.rect.y, = self.pos['x'], self.pos['y']
 
 	def iscolliding(self, entity):
 		# self corners
