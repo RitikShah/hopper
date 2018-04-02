@@ -2,7 +2,8 @@ import pygame
 import json
 import time
 import random
-import entity
+from enemy import *
+from character import *
 from text import *
 from screen import *
 from color import *
@@ -35,6 +36,8 @@ class Game:
 
 		self.s_main    = Screen(self.gamedisplay, self.t_title, c=self.t_play, q=self.t_quit)
 
+		self.c 		   = Character(winw/2, winh/2)
+
 	def curve(self, currentlevel):
 		return (currentlevel**1.2) * 30
 
@@ -51,11 +54,10 @@ class Game:
 		output = self.s_main.loop()
 		while True:
 			self.level 	   = 1
-
-			self.c 		   = entity.Character(winw/2, winh/2)
 			self.tick	   = 0
 			self.points    = 0
-			entity.Enemy.reset(self.data[1])
+			self.c.reset(winw/2, winh/2)
+			Enemy.reset(self.data[0])
 		
 			if output == pygame.K_q:
 				self.quitgame()
@@ -75,7 +77,7 @@ class Game:
 		if self.points > self.curve(self.level):
 			self.level += 1
 			if len(self.data) >= self.level:
-				entity.Enemy.difficulty(self.data[self.level - 1])
+				Enemy.difficulty(self.data[self.level - 1])
 			# later: Include infinite difficulty curve
 
 	def waitforrelease(self):
@@ -95,7 +97,7 @@ class Game:
 				self.waitforrelease()
 				return 'quit'
 			elif key[pygame.K_p]:
-				Text(self.gamedisplay, 'Paused', white, 60).displaytext()
+				Text(self.gamedisplay, '~ Paused ~', white, 60).displaytext()
 				pygame.display.update()
 				self.waitforrelease()
 				key = pygame.key.get_pressed()
@@ -105,7 +107,7 @@ class Game:
 				self.waitforrelease()
 			else:
 				self.c.update(key)
-				for e in entity.Enemy.enemylist:
+				for e in Enemy.enemylist:
 					e.update()
 
 			# Display Clear
@@ -115,7 +117,7 @@ class Game:
 			pygame.draw.rect(self.gamedisplay, self.c.color, self.c.display())
 
 			# Display Enemies
-			for e in entity.Enemy.enemylist:
+			for e in Enemy.enemylist:
 				pygame.draw.rect(self.gamedisplay, e.color, e.display())
 				if e.iscolliding(self.c):
 					return 'dead'
@@ -123,9 +125,9 @@ class Game:
 			# Display Floor
 			# pygame.draw.rect(self.gamedisplay, white, [0, winh-95, winw, 4])
 
-			if self.tick > entity.Enemy.spawnrate:
+			if self.tick > Enemy.spawnrate:
 				self.tick = 0
-				entity.Enemy() # new enemy
+				Enemy() # new enemy
 
 			self.tick += 1
 
@@ -137,8 +139,8 @@ class Game:
 			# Display
 			Text(self.gamedisplay, 'Level: ' + str(self.level), white, ycenter=False, yoffset=20).displaytext()
 			Text(self.gamedisplay, 'Score: ' + str(self.points), white, ycenter=False, yoffset=40).displaytext()
-			Text(self.gamedisplay, 'Spawn Rate: ' + str(entity.Enemy.spawnrate), white, ycenter=False, yoffset=60).displaytext()
-			Text(self.gamedisplay, 'Direction: ' + str(entity.Enemy.direction), white, ycenter=False, yoffset=80).displaytext()
+			Text(self.gamedisplay, 'Spawn Rate: ' + str(Enemy.spawnrate), white, ycenter=False, yoffset=60).displaytext()
+			Text(self.gamedisplay, 'Direction: ' + str(Enemy.direction), white, ycenter=False, yoffset=80).displaytext()
 
 			pygame.display.update()
 			self.clock.tick(self.fps)

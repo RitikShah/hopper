@@ -1,23 +1,31 @@
 from color import *
-import random
-import pygame
 
 winw = 800
 winh = 600
 
 class Entity:
-	def __init__(self, posx, posy, velx=0, vely=0, h=5, w=5, c=None):
-		self.size 		= {'height': h, 'width': w}
-		self.velocity	= {'x': velx, 'y': vely}
-		self.pos		= {'x': posx, 'y': posy - h/2}
+	def __init__(self, posx, posy, velx=0, vely=0, h=5, w=5, grav=1, color=randcolor()):
+		self.grav 	  = grav
+		self.size 	  = {'height': h, 'width': w}
+		self.velocity = {'x': velx, 'y': vely}
+		self.pos	  = {'x': posx, 'y': posy - h/2}
+		self.color	  = color
 
-		if c == None:
-			self.color 	= randcolor()
-		else:
-			self.color	= c
+	def __str__(self):
+		return self.__class__ + ' Entity'
 
 	def display(self):
 		return [self.pos['x'], self.pos['y'], self.size['width'], self.size['height']]
+
+	def gravity(self):
+		self.pos['y'] += self.velocity['y']
+		self.velocity['y'] += self.grav
+		if self.pos['y'] > winh-self.floorlevel:
+			self.pos['y'] = winh-self.floorlevel
+			self.velocity['y'] = 0
+
+	def update(self):
+		print(self)
 
 	def iscolliding(self, entity):
 		# self corners
@@ -43,93 +51,11 @@ class Entity:
 				return True
 		else:
 			return False
+'''
+	def getfloor(self):
+		return floor
 
-class Enemy(Entity):
-	# Static Variables
-	enemylist = []
-	spawnrate = 100
-	direction = 'l'
-	rrange    = (1,5)
-
+# Wierd :/
+class Floor(Entity):
 	def __init__(self):
-		if self.direction == 'l':
-			velx = random.randint(self.rrange[0],self.rrange[1])	
-			posx = 0
-		elif self.direction == 'r':
-			velx = -random.randint(self.rrange[0],self.rrange[1])
-			posx = winw
-		elif self.direction == 'lr':
-			if random.randint(0,1):
-				velx = random.randint(self.rrange[0],self.rrange[1])
-				posx = 0
-			else:
-				velx = -random.randint(self.rrange[0],self.rrange[1])	
-				posx = winw
-
-		super().__init__(posx, winh-100, velx, 0, random.randint(5,10), random.randint(5,10))
-		self.enemylist.append(self)
-
-	def update(self):
-		self.pos['x'] += self.velocity['x']
-		if self.pos['x'] > winw + self.size['width'] or self.pos['x'] < 0 - self.size['width']:
-			self.enemylist.remove(self)
-	
-	@classmethod # Static Method
-	def reset(klass, data):
-		global enemylist, spawnrate, direction
-		klass.enemylist = []
-		klass.spawnrate = data['spawnrate']
-		klass.direction = data['direction']
-		klass.rrange    = data['random_range']
-
-	@classmethod # Static Method
-	def difficulty(klass, data):
-		global spawnrate, direction
-		klass.spawnrate = data['spawnrate']
-		klass.direction = data['direction']
-		klass.rrange    = data['random_range']
-
-class Character(Entity):
-	def __init__(self, posx, posy):
-		super().__init__(posx, posy, 5)
-
-		self.grav   = 1
-		self.xspeed = 5
-
-		self.jumpheight = 15
-		self.floorlevel = 100
-
-		self.jumps 		= 0
-		self.maxjumps	= 1
-		self.spacehold  = False
-
-	def update(self, key):
-		# Key Listener
-		if key[pygame.K_SPACE] and not(self.spacehold):
-			if self.pos['y'] == winh-self.floorlevel: 	# Ground Level
-				self.jumps = self.maxjumps
-				self.velocity['y'] = -self.jumpheight
-				self.spacehold = True
-			elif self.jumps > 0:						# Double Jump
-				self.jumps -= 1
-				self.velocity['y'] = -self.jumpheight
-				self.spacehold = True
-		elif not(key[pygame.K_SPACE]):
-			self.spacehold = False
-
-		if key[pygame.K_LEFT]:
-			self.pos['x'] -= self.xspeed
-		elif key[pygame.K_RIGHT]:
-			self.pos['x'] += self.xspeed
-
-		if self.pos['x'] > winw-self.size['width']:
-			self.pos['x'] = winw-self.size['width']
-		if self.pos['x'] < 0:
-			self.pos['x'] = 0
-
-		# Gravity
-		self.pos['y'] += self.velocity['y']
-		self.velocity['y'] += self.grav
-		if self.pos['y'] > winh-self.floorlevel:
-			self.pos['y'] = winh-self.floorlevel
-			self.velocity['y'] = 0
+'''
