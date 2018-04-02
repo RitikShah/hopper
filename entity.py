@@ -4,12 +4,15 @@ winw = 800
 winh = 600
 
 class Entity:
-	def __init__(self, posx, posy, velx=0, vely=0, h=5, w=5, grav=1, color=randcolor()):
-		self.grav 	  = grav
-		self.size 	  = {'height': h, 'width': w}
-		self.velocity = {'x': velx, 'y': vely}
-		self.pos	  = {'x': posx, 'y': posy - h/2}
-		self.color	  = color
+	def __init__(self, posx, posy, velx=0, vely=0, h=5, w=5, grav=1, color=None):
+		self.grav 	   = grav
+		self.size 	   = {'height': h, 'width': w}
+		self.velocity  = {'x': velx, 'y': vely}
+		self.pos	   = {'x': posx, 'y': posy - h/2}
+		if color == None:
+			self.color = randcolor()
+		else:
+			self.color = c
 
 	def __str__(self):
 		return self.__class__ + ' Entity'
