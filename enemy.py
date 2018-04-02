@@ -1,10 +1,11 @@
 from color import *
 import random
 from entity import *
+import pygame
 
 class Enemy(Entity):
 	# Static Variables
-	enemylist = []
+	enemylist = pygame.sprite.Group()
 	spawnrate = 100
 	direction = 'l'
 	rrange    = (1,5)
@@ -35,7 +36,7 @@ class Enemy(Entity):
 	@classmethod # Static Method
 	def reset(klass, data):
 		global enemylist, spawnrate, direction
-		klass.enemylist = []
+		klass.enemylist = pygame.sprite.Group()
 		klass.spawnrate = data['spawnrate']
 		klass.direction = data['direction']
 		klass.rrange    = data['random_range']

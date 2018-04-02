@@ -53,10 +53,14 @@ class Game:
 	def run(self):
 		output = self.s_main.loop()
 		while True:
-			self.level 	   = 1
-			self.tick	   = 0
-			self.points    = 0
+			self.level 	    = 1
+			self.tick	    = 0
+			self.points     = 0
 			self.c.reset(winw/2, winh/2)
+
+			self.allsprites = pygame.sprite.Group()
+			self.allsprites.add(c)
+
 			Enemy.reset(self.data[0])
 		
 			if output == pygame.K_q:
@@ -127,7 +131,9 @@ class Game:
 
 			if self.tick > Enemy.spawnrate:
 				self.tick = 0
-				Enemy() # new enemy
+				enemy = Enemy() # new enemy
+				self.enemylist.add(enemy)
+				self.allsprites.add(enemy)
 
 			self.tick += 1
 
