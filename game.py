@@ -37,6 +37,7 @@ class Game:
 		self.s_main    = Screen(self.gamedisplay, self.t_title, c=self.t_play, q=self.t_quit)
 
 		self.player	   = Character(winw/2, winh/2)
+		self.allsprites = pygame.sprite.Group()
 
 	def curve(self, currentlevel):
 		return (currentlevel**1.2) * 30
@@ -103,7 +104,7 @@ class Game:
 				return 'quit'
 			elif key[pygame.K_p]:
 				Text(self.gamedisplay, '~ Paused ~', white, 60).displaytext()
-				pygame.display.update()
+				pygame.display.flip()
 				self.waitforrelease()
 				key = pygame.key.get_pressed()
 				while not(key[pygame.K_p]):
@@ -116,7 +117,7 @@ class Game:
 
 			# Collision Detection 
 			collisions = pygame.sprite.spritecollide(self.player, Enemy.enemylist, True)
-			if len(collisions) > 1:
+			if collisions:
 				return 'dead'
 
 			# Enemy Spawning
@@ -146,7 +147,7 @@ class Game:
 			#		return 'dead'
 
 			# Display Floor
-			# pygame.draw.rect(self.gamedisplay, white, [0, winh-95, winw, 4])
+			#pygame.draw.rect(self.gamedisplay, white, [0, winh-95, winw, 4])
 
 			# Display Text (last two temp)
 			Text(self.gamedisplay, 'Level: ' + str(self.level), white, ycenter=False, yoffset=20).displaytext()
