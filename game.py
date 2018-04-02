@@ -16,7 +16,7 @@ class Game:
 		pygame.init()
 		self.clock = pygame.time.Clock()
 		self.gamedisplay = pygame.display.set_mode((winw, winh))
-		pygame.display.set_caption("Slayin'")
+		pygame.display.set_caption("Hopper")
 
 		with open('level.json') as file:
 			self.data = json.load(file)
@@ -27,7 +27,7 @@ class Game:
 		self.keynone   = tuple([0] * 323)
 
 		self.t_empty   = Text(self.gamedisplay, '')
-		self.t_title   = Text(self.gamedisplay, "Slayin'", green, 100)
+		self.t_title   = Text(self.gamedisplay, "Hopper", green, 100)
 		self.t_over    = Text(self.gamedisplay, 'Game Over', red, 80)
 
 		self.t_play    = Text(self.gamedisplay, 'C to play', yoffset=60)
